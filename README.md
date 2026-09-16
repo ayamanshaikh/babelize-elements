@@ -191,6 +191,16 @@ Great component candidates:
   </a>
 </p>
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=babelize%2Fbabelize-elements&type=date&legend=top-right">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=babelize/babelize-elements&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=babelize/babelize-elements&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=babelize/babelize-elements&type=date&legend=top-left" />
+ </picture>
+</a>
+
 ## License
 
 [MIT](https://github.com/babelize/babelize-elements/blob/main/LICENSE) © [Babelize](https://babelize.co)
