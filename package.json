@@ -95,7 +95,6 @@
     "fumadocs-core": "^16.14.0",
     "fumadocs-mdx": "^15.2.2",
     "fumadocs-ui": "^16.14.0",
-    "geist": "^1.7.2",
     "jsdom": "^30.0.1",
     "lucide-react": "^1.28.0",
     "motion": "^12.43.0",

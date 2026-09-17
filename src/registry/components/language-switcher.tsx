@@ -303,13 +303,17 @@ export const LanguageSwitcher = React.forwardRef<HTMLDivElement, LanguageSwitche
     }, [open]);
 
     return (
-      <div ref={ref} className={cn("relative inline-block text-sm z-50", className)} {...rest}>
+      <div
+        ref={ref}
+        dir={dir}
+        className={cn("relative inline-block text-sm z-50", className)}
+        {...rest}
+      >
         <button
           type="button"
           onClick={() => setOpen(!open)}
           className={cn(
             "inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700 dark:hover:text-zinc-50",
-            dir === "rtl" && "flex-row-reverse",
           )}
           aria-expanded={open}
           aria-haspopup="listbox"
@@ -365,8 +369,7 @@ export const LanguageSwitcher = React.forwardRef<HTMLDivElement, LanguageSwitche
                       setSearch("");
                     }}
                     className={cn(
-                      "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors",
-                      itemDir === "rtl" && "flex-row-reverse text-right",
+                      "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-sm transition-colors",
                       isActive
                         ? "bg-emerald-500/10 text-emerald-600 font-medium dark:text-emerald-400"
                         : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100",

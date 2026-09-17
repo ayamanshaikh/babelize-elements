@@ -53,11 +53,6 @@ describe("LanguageSwitcher", () => {
     expect(screen.getByRole("button", { name: /Current language: French/ })).toBeInTheDocument();
   });
 
-  it("marks RTL locales with dir=rtl", () => {
-    render(<LanguageSwitcher locales={locales} defaultValue="ar" />);
-    expect(screen.getByRole("button").className).toContain("flex-row-reverse");
-  });
-
   it("forwards a ref to the root element", () => {
     const ref = React.createRef<HTMLDivElement>();
     render(<LanguageSwitcher locales={locales} ref={ref} />);
@@ -74,5 +69,37 @@ describe("LanguageSwitcher", () => {
     await userEvent.click(screen.getByRole("button", { name: /Current language/ }));
 
     expect(screen.getByRole("textbox", { name: "Search languages" })).toBeInTheDocument();
+  });
+
+  it("marks the root rtl for an RTL locale and ltr otherwise", () => {
+    const { container, rerender } = render(
+      <LanguageSwitcher locales={locales} defaultValue="ar" />,
+    );
+    expect(container.firstElementChild).toHaveAttribute("dir", "rtl");
+
+    rerender(<LanguageSwitcher locales={locales} value="en" />);
+    expect(container.firstElementChild).toHaveAttribute("dir", "ltr");
+  });
+
+  it("lets a caller override the direction", () => {
+    const { container } = render(
+      <LanguageSwitcher locales={locales} defaultValue="ar" dir="ltr" />,
+    );
+    expect(container.firstElementChild).toHaveAttribute("dir", "ltr");
+  });
+
+  it("does not reverse an RTL row twice", async () => {
+    // `dir="rtl"` already lays a flex row out right-to-left; a flex-row-reverse on
+    // top of it put the row back in LTR order.
+    render(<LanguageSwitcher locales={locales} defaultValue="ar" showFlags />);
+    const trigger = screen.getByRole("button", { name: /Current language/ });
+    expect(trigger.className).not.toContain("flex-row-reverse");
+
+    await userEvent.click(trigger);
+    const option = screen.getByRole("option", { name: /العربية|Arabic/ });
+    expect(option).toHaveAttribute("dir", "rtl");
+    expect(option.className).not.toContain("flex-row-reverse");
+    expect(option.className).not.toContain("text-right");
+    expect(option.className).not.toContain("text-left");
   });
 });

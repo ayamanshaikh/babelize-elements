@@ -10,6 +10,25 @@ From `1.1.0` onward, release notes live in
 is published by creating a tag there, and the notes are written at that point.
 Everything below is retained history.
 
+## [1.1.4] - 2026-09-17
+
+### Fixed
+
+- `LanguageSwitcher`: RTL rows were reversed twice. Each option already carried
+  `dir="rtl"`, which lays a flex row out right-to-left on its own; the
+  `flex-row-reverse` applied on top put it back into left-to-right order. The
+  trigger reversed itself the same way, and `text-left` pinned the label against
+  the direction.
+- `LanguageSwitcher`: the root element never carried `dir`, so an RTL locale did
+  not set the direction for its own subtree. It does now, and a caller can still
+  override it by passing `dir`.
+
+### Removed
+
+- Two orphaned landing-page components (`hero-demo`, `theme-toggle`), the unused
+  `registryItemNames` export, and the unused `geist` dependency. Registry
+  constants that are only read inside the module are no longer exported.
+
 ## [1.1.3] - 2026-09-17
 
 ### Removed

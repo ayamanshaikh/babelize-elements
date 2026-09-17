@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const REGISTRY_NAME = "babelize";
-export const REGISTRY_HOMEPAGE = "https://elements.babelize.co";
-export const REGISTRY_SCHEMA = "https://ui.shadcn.com/schema/registry.json";
-export const REGISTRY_ITEM_SCHEMA = "https://ui.shadcn.com/schema/registry-item.json";
+const REGISTRY_NAME = "babelize";
+const REGISTRY_HOMEPAGE = "https://elements.babelize.co";
+const REGISTRY_SCHEMA = "https://ui.shadcn.com/schema/registry.json";
+const REGISTRY_ITEM_SCHEMA = "https://ui.shadcn.com/schema/registry-item.json";
 
 interface ItemDef {
   name: string;
@@ -172,5 +172,3 @@ export function getRegistryIndex() {
     })),
   };
 }
-
-export const registryItemNames = ITEMS.map((item) => item.name);
