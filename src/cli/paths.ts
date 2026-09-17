@@ -62,3 +62,38 @@ export function resolveAliasToDir(alias: string, config: TsPathsConfig | null): 
 
   return fallback;
 }
+
+/**
+ * Path a registry file is written to, relative to the project root.
+ *
+ * Each registry type selects the alias it is written under — `ui`, `lib`, `hooks`
+ * — matching how the shadcn CLI resolves the same item.
+ *
+ * `cn` is the exception: its location is pinned by an alias other than the
+ * directory it nominally lives in, because components import it through `utils`,
+ * which a project may point somewhere other than `<lib>/utils`. Writing it under
+ * `lib` in that case leaves every component importing a file that does not exist.
+ */
+export function resolveFileDestination(
+  filePath: string,
+  fileType: string,
+  aliases: Record<string, string>,
+  config: TsPathsConfig | null,
+): string {
+  const toDir = (alias: string) => resolveAliasToDir(alias, config);
+
+  if (filePath.replace(/^lib\//, "") === "utils.ts") {
+    return `${toDir(aliases.utils)}.ts`;
+  }
+
+  const dir =
+    fileType === "registry:lib"
+      ? toDir(aliases.lib)
+      : fileType === "registry:hook"
+        ? toDir(aliases.hooks)
+        : fileType === "registry:ui"
+          ? toDir(aliases.ui)
+          : toDir(aliases.components);
+
+  return [dir, filePath.replace(/^(components|lib|ui|hooks)\//, "")].filter(Boolean).join("/");
+}

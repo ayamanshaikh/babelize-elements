@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, Check, Code, Copy } from "lucide-react";
@@ -527,6 +527,14 @@ export function ComponentShowcase() {
   const [activeId, setActiveId] = useState<(typeof ITEMS)[number]["id"]>("pill");
   const [showCode, setShowCode] = useState(false);
   const [copied, setCopied] = useState(false);
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (copyTimer.current) clearTimeout(copyTimer.current);
+    },
+    [],
+  );
 
   const active = ITEMS.find((item) => item.id === activeId)!;
 
@@ -542,7 +550,8 @@ export function ComponentShowcase() {
       document.body.removeChild(ta);
     }
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (copyTimer.current) clearTimeout(copyTimer.current);
+    copyTimer.current = setTimeout(() => setCopied(false), 2000);
   };
 
   return (

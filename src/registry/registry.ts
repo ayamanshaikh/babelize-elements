@@ -13,7 +13,14 @@ interface ItemDef {
   type: string;
   /** Source file relative to `src/`. */
   source: string;
-  /** Install destination path (shadcn resolves it against the user's aliases). */
+  /**
+   * Install destination, relative to the alias its `type` selects — `ui/<file>`
+   * for `registry:ui`, `lib/<file>` for `registry:lib`. Components are
+   * `registry:ui` rather than `registry:component` because that is the only type
+   * the shadcn CLI resolves against the consumer's `ui` alias; tagged as
+   * components they were forced into `<components>/ui` whatever the project had
+   * configured.
+   */
   filePath: string;
   dependencies?: string[];
   registryDependencies?: string[];
@@ -25,41 +32,41 @@ const ITEMS: ItemDef[] = [
     title: "Language Switcher",
     description:
       "Copy-paste language switcher component for React with dropdown, search, RTL support, and full accessibility.",
-    type: "registry:component",
+    type: "registry:ui",
     source: "registry/components/language-switcher",
-    filePath: "components/ui/language-switcher.tsx",
+    filePath: "ui/language-switcher.tsx",
     dependencies: ["clsx", "tailwind-merge"],
-    registryDependencies: ["utils", "locale-types", "use-controllable-state"],
+    registryDependencies: ["locale-types", "use-controllable-state"],
   },
   {
     name: "phone-input",
     title: "Phone Input",
     description:
       "International phone number input with country selector, flag emojis, and dial code search for 50 countries.",
-    type: "registry:component",
+    type: "registry:ui",
     source: "registry/components/phone-input",
-    filePath: "components/ui/phone-input.tsx",
+    filePath: "ui/phone-input.tsx",
     dependencies: ["clsx", "tailwind-merge"],
-    registryDependencies: ["utils", "use-controllable-state"],
+    registryDependencies: ["use-controllable-state"],
   },
   {
     name: "navbar",
     title: "NavBar",
     description:
       "Responsive navigation bar with built-in language selector, mobile menu, CTA button, and GitHub link.",
-    type: "registry:component",
+    type: "registry:ui",
     source: "registry/components/navbar",
-    filePath: "components/ui/navbar.tsx",
+    filePath: "ui/navbar.tsx",
     dependencies: ["clsx", "tailwind-merge"],
-    registryDependencies: ["utils", "locale-types", "use-controllable-state"],
+    registryDependencies: ["locale-types", "use-controllable-state"],
   },
   {
     name: "locale-types",
     title: "Locale Types",
     description: "The shared `Locale` interface used by every locale-aware component.",
-    type: "registry:component",
+    type: "registry:ui",
     source: "registry/components/types",
-    filePath: "components/ui/types.ts",
+    filePath: "ui/types.ts",
   },
   {
     name: "use-controllable-state",
@@ -80,6 +87,18 @@ const ITEMS: ItemDef[] = [
     dependencies: ["clsx", "tailwind-merge"],
   },
 ];
+
+/**
+ * `utils` is deliberately absent from every `registryDependencies` list, matching
+ * how shadcn's own components are published: they import `cn` through the `utils`
+ * alias and assume the file is already there, because `shadcn init` creates it.
+ *
+ * Listing it instead made the shadcn CLI write `cn` into the `lib` directory while
+ * still rewriting the import to the `utils` alias — an unresolvable import in any
+ * project that points `utils` somewhere other than `<lib>/utils`, and a silent
+ * overwrite of the project's own `cn` everywhere else. The bundled CLI installs
+ * `utils` itself when the file is genuinely missing.
+ */
 
 /**
  * Absolute URL for an item in this registry.

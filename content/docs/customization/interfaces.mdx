@@ -55,7 +55,9 @@ export interface Locale {
 export interface LanguageSwitcherProps {
   /** Array of available locales — only `code` is required */
   locales: Locale[];
-  /** Initial selected locale code (default: first locale's code) */
+  /** Selected locale code. Provide this to control the component. */
+  value?: string;
+  /** Initial selected locale code when uncontrolled (default: first locale's code) */
   defaultValue?: string;
   /** Callback when locale changes */
   onValueChange?: (code: string) => void;
@@ -89,10 +91,12 @@ export interface Country {
 
 ```ts
 export interface PhoneInputProps {
-  /** Phone number value */
+  /** Phone number. Provide this to control the component. */
   value?: string;
-  /** Callback when phone number or country changes */
-  onChange?: (phone: string, country: Country) => void;
+  /** Initial phone number when uncontrolled */
+  defaultValue?: string;
+  /** Callback when the number or the selected country changes */
+  onValueChange?: (phone: string, country: Country) => void;
   /** Default country code (default: "US") */
   defaultCountry?: string;
   /** Placeholder text */
@@ -123,6 +127,9 @@ export interface NavLink {
 
 > `NavBar` uses the same shared `Locale` interface as `LanguageSwitcher`. The old
 > `NavBarLocale` alias was removed in `1.1.0` — import `Locale` instead.
+>
+> `NavBar`'s `currentLocale` / `onLocaleChange` and `PhoneInput`'s `onChange` /
+> `showFlag` were removed in `1.1.3`. Use `value` / `onValueChange` / `showFlags`.
 
 ### NavBarProps
 
@@ -134,10 +141,14 @@ export interface NavBarProps {
   links?: NavLink[];
   /** Available locales for language selector */
   locales?: Locale[];
-  /** Currently selected locale code */
+  /** Selected locale code. Provide this to control the component. */
   value?: string;
+  /** Initial locale code when uncontrolled (default: first locale's code) */
+  defaultValue?: string;
   /** Callback when locale changes */
   onValueChange?: (code: string) => void;
+  /** Component used to render internal links (default: "a") */
+  linkComponent?: React.ElementType;
   /** CTA button */
   cta?: { label: string; href: string };
   /** Show GitHub icon button */

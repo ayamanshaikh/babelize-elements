@@ -43,16 +43,6 @@ describe("PhoneInput", () => {
     expect(screen.getByRole("textbox")).toHaveValue("222");
   });
 
-  it("still accepts the deprecated onChange and showFlag props", async () => {
-    const onChange = vi.fn();
-    render(<PhoneInput onChange={onChange} showFlag={false} />);
-
-    await userEvent.type(screen.getByRole("textbox"), "7");
-
-    expect(onChange).toHaveBeenCalledWith("7", expect.objectContaining({ code: "US" }));
-    expect(screen.queryByText(COUNTRIES[0].flag)).not.toBeInTheDocument();
-  });
-
   it("forwards a ref to the underlying input and accepts a name", () => {
     const ref = React.createRef<HTMLInputElement>();
     render(<PhoneInput ref={ref} name="phone" />);
@@ -70,5 +60,45 @@ describe("PhoneInput", () => {
 
     await userEvent.type(screen.getByPlaceholderText(/search/i), "Germ");
     expect(screen.getByRole("option", { name: /Germany/ })).toBeInTheDocument();
+  });
+
+  it("keeps the forwarded ref on the phone input while the country list is open", async () => {
+    // The search box used to share `inputRef`, so opening the list silently
+    // repointed the forwarded ref at the wrong element.
+    const ref = React.createRef<HTMLInputElement>();
+    render(<PhoneInput ref={ref} />);
+    expect(ref.current?.type).toBe("tel");
+
+    await userEvent.click(screen.getByRole("button", { name: "Select country" }));
+    expect(ref.current?.type).toBe("tel");
+  });
+
+  it("returns focus to the phone input after a country is picked", async () => {
+    render(<PhoneInput />);
+    await userEvent.click(screen.getByRole("button", { name: "Select country" }));
+    await userEvent.click(screen.getByRole("option", { name: /India/ }));
+
+    expect((document.activeElement as HTMLInputElement | null)?.type).toBe("tel");
+  });
+
+  it("focuses the search box when the country list opens", async () => {
+    render(<PhoneInput />);
+    await userEvent.click(screen.getByRole("button", { name: "Select country" }));
+
+    expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "Search countries" }));
+  });
+
+  it("exports a COUNTRIES table with well-formed entries", () => {
+    expect(COUNTRIES.length).toBeGreaterThan(0);
+
+    for (const country of COUNTRIES) {
+      expect(country.code).toMatch(/^[A-Z]{2}$/);
+      expect(country.dialCode).toMatch(/^\+\d{1,4}$/);
+      expect(country.name).not.toBe("");
+      expect(country.flag).not.toBe("");
+    }
+
+    // Duplicate codes would make the country list ambiguous to select from.
+    expect(new Set(COUNTRIES.map((c) => c.code)).size).toBe(COUNTRIES.length);
   });
 });

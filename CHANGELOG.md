@@ -10,6 +10,69 @@ From `1.1.0` onward, release notes live in
 is published by creating a tag there, and the notes are written at that point.
 Everything below is retained history.
 
+## [1.1.3] - 2026-09-17
+
+### Removed
+
+- **Breaking:** `PhoneInput`'s deprecated `onChange` and `showFlag` props. Use
+  `onValueChange` and `showFlags`. Same caveat as below — a patch release, so a
+  `^1.1.0` range picks it up and the old props fail silently rather than loudly.
+- **Breaking:** `NavBar`'s deprecated `currentLocale` and `onLocaleChange` props.
+  Use `value` and `onValueChange` instead. Shipped in a patch release by
+  maintainer decision, so a version range like `^1.1.0` picks it up
+  automatically: code still passing the old props type-checks and compiles, but
+  silently stops tracking the locale. Update both call sites together.
+
+### Fixed
+
+- The published bundle lost the `"use client"` directive, so importing the
+  package from a React Server Component crashed the build with
+  `useState is not a function`. The directive is now emitted in both the ESM and
+  CJS output, and the packaging smoke test asserts it.
+- `exports` declared no `require` types condition, leaving `dist/index.d.cts`
+  unreachable for CommonJS consumers.
+- `NavBar`: picking a language from the mobile bar did nothing — the outside-click
+  handler only guarded the desktop container, so it closed the menu before the
+  option's click landed.
+- `NavBar`: the language menu mounted two listboxes into the accessibility tree at
+  once, because the desktop and mobile bars are both always in the DOM.
+- `NavBar`: the mobile menu toggle had no `type="button"` (submitting any
+  enclosing form) and no `aria-expanded`.
+- `NavBar`: closing the mobile menu cleared `body.overflow` instead of restoring
+  the page's own value.
+- `NavBar`: `Escape` now closes the language menu and the mobile panel.
+- `NavBar`: an uncontrolled bar defaulted to `"en"` even when `locales` did not
+  contain it; it now falls back to the first locale, matching `LanguageSwitcher`.
+- `PhoneInput`: the country search box shared a ref with the phone field, so the
+  forwarded ref pointed at the search input whenever the dropdown was open, and
+  picking a country moved focus to an element that was about to unmount instead of
+  back to the number field.
+- `PhoneInput` / `LanguageSwitcher`: the search boxes had no accessible name.
+- Docs: the TypeScript interfaces page documented `PhoneInput`'s deprecated
+  `onChange` as the callback to use and omitted `value` / `defaultValue`.
+- Docs site: the copy buttons left a pending timer behind on unmount.
+- Registry: components were published as `registry:component`, the one type the
+  shadcn CLI does *not* resolve against the consumer's `ui` alias, so they were
+  forced into `<components>/ui` whatever the project had configured. They are now
+  `registry:ui`, matching how shadcn publishes its own components.
+- Registry: `utils` is no longer a `registryDependency` of any component. Listing it
+  made the shadcn CLI write `cn` into the `lib` directory while rewriting the import
+  to the `utils` alias — an unresolvable import in any project that points `utils`
+  elsewhere, and a silent overwrite of the project's own `cn` in every other case.
+  Components now assume `cn` exists, as shadcn's own components do.
+- CLI: writes each file to the alias its type selects (`ui`, `lib`, `hooks`) instead
+  of forcing everything under `components`, and installs `cn` itself only when the
+  file is genuinely missing — never over an existing one.
+
+### Added
+
+- `@babelize/elements/utils` — the `cn` helper without the `"use client"`
+  directive, so server components can call it.
+- Installation docs now cover the Tailwind `@source` / `content` step the npm
+  package needs; without it every component renders unstyled.
+- An Open Graph / Twitter card image, which the site previously declared
+  `summary_large_image` for without ever supplying one.
+
 ## [1.0.1] - [1.0.16] - 2026-08-15 to 2026-08-23
 
 These sixteen releases were published automatically, one npm patch per push to

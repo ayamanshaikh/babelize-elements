@@ -7,7 +7,7 @@
  * installing the tarball somewhere else proves the package actually resolves.
  */
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, writeFileSync, readdirSync, rmSync } from "node:fs";
+import { mkdtempSync, writeFileSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -77,10 +77,36 @@ console.log("  CJS require OK");
 `,
   );
 
+  writeFileSync(
+    join(app, "utils.mjs"),
+    `import { cn } from "@babelize/elements/utils";
+if (cn("a", false && "b", "c") !== "a c") throw new Error("cn subpath broken");
+console.log("  @babelize/elements/utils OK");
+`,
+  );
+
   console.log("→ importing as ESM");
   run("node", ["esm.mjs"], app);
   console.log("→ requiring as CJS");
   run("node", ["cjs.cjs"], app);
+  console.log("→ importing the utils subpath");
+  run("node", ["utils.mjs"], app);
+
+  // A bundler strips the per-file "use client" directives, and without it every
+  // component throws "useState is not a function" inside a React Server
+  // Component — the default in the Next.js App Router. Assert on the shipped
+  // artifacts so the directive cannot silently disappear again.
+  console.log('→ checking the "use client" directive survived bundling');
+  for (const file of ["dist/index.js", "dist/index.cjs"]) {
+    const head = readFileSync(join(app, "node_modules/@babelize/elements", file), "utf8").slice(
+      0,
+      200,
+    );
+    if (!/^\s*["']use client["']/.test(head)) {
+      throw new Error(`${file} is missing the "use client" directive`);
+    }
+  }
+  console.log('  "use client" present in ESM and CJS output');
 
   console.log("\n✓ packaging smoke test passed");
 } catch (err) {

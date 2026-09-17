@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
-import { parseJsonc, resolveAliasToDir, type TsPathsConfig } from "./paths";
+import { parseJsonc, resolveFileDestination, type TsPathsConfig } from "./paths";
 
 const REGISTRY_URL = process.env.BABELIZE_REGISTRY ?? "https://elements.babelize.co/r";
 const BASE_URL = REGISTRY_URL.replace(/\/r\/?$/, "");
@@ -81,10 +81,6 @@ function resolveAliases(): Record<string, string> {
 
 const tsPaths = readTsPaths();
 
-function aliasToDir(alias: string): string {
-  return resolveAliasToDir(alias, tsPaths);
-}
-
 async function fetchItem(nameOrUrl: string): Promise<RegistryItem> {
   // registryDependencies are absolute URLs, because the shadcn CLI resolves bare
   // names against its own registry. Accept both forms.
@@ -113,10 +109,7 @@ function installDependencies(pm: string, deps: string[]): void {
 }
 
 function resolveDestination(file: RegistryFile, aliases: Record<string, string>): string {
-  const dir =
-    file.type === "registry:lib" ? aliasToDir(aliases.lib) : aliasToDir(aliases.components);
-  const pathInDir = file.path.replace(/^(components|lib|ui|hooks)\//, "");
-  return join(projectRoot, dir, pathInDir);
+  return join(projectRoot, resolveFileDestination(file.path, file.type, aliases, tsPaths));
 }
 
 function rewriteImports(content: string, aliases: Record<string, string>): string {
@@ -143,6 +136,31 @@ function writeItem(
   }
 }
 
+/**
+ * Writes `cn` only when the project does not already have it.
+ *
+ * The registry does not list `utils` as a dependency of any component — shadcn's
+ * own components assume `cn` exists, because `shadcn init` creates it. This CLI
+ * also runs in projects that never ran `shadcn init`, so it fills the gap here,
+ * and skips the file when it is already present rather than overwriting a `cn`
+ * the project may have customised.
+ */
+async function ensureUtils(
+  aliases: Record<string, string>,
+  written: Set<string>,
+  deps: Set<string>,
+): Promise<void> {
+  const dest = join(
+    projectRoot,
+    resolveFileDestination("lib/utils.ts", "registry:lib", aliases, tsPaths),
+  );
+  if (written.has(dest) || existsSync(dest)) return;
+
+  const item = await fetchItem("utils");
+  for (const dep of item.dependencies ?? []) deps.add(dep);
+  writeItem(item, aliases, written);
+}
+
 async function addComponents(names: string[], aliases: Record<string, string>): Promise<void> {
   const visited = new Set<string>();
   const written = new Set<string>();
@@ -167,6 +185,8 @@ async function addComponents(names: string[], aliases: Record<string, string>): 
   for (const name of names) {
     await addItem(name);
   }
+
+  await ensureUtils(aliases, written, deps);
 
   if (deps.size > 0) {
     installDependencies(detectPackageManager(), [...deps]);

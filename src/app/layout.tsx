@@ -4,6 +4,13 @@ import { RootProvider } from "fumadocs-ui/provider/next";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
+const OG_IMAGE = {
+  url: "/og.png",
+  width: 1774,
+  height: 887,
+  alt: "Babelize Elements — open source UI components for a global web, with localization, RTL and accessibility built in.",
+};
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -42,12 +49,14 @@ export const metadata: Metadata = {
     title: "Babelize Elements - Open Source Localization UI Components",
     description:
       "Open-source Localization UI components for React and Tailwind CSS. Built by the community.",
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: "Babelize Elements - Open Source Localization UI Components",
     description:
       "Open-source Localization UI components for React and Tailwind CSS. Built by the community.",
+    images: [OG_IMAGE],
   },
 };
 

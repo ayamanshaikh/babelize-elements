@@ -44,6 +44,23 @@
 npm install @babelize/elements
 ```
 
+Tailwind does not scan `node_modules`, so point it at the package once — otherwise
+the components render unstyled:
+
+```css
+/* Tailwind v4 — in the CSS file that imports Tailwind */
+@import "tailwindcss";
+@source "../node_modules/@babelize/elements/dist";
+```
+
+```js
+// Tailwind v3 — in tailwind.config.js
+content: ["./src/**/*.{ts,tsx}", "./node_modules/@babelize/elements/dist/**/*.js"],
+```
+
+Components installed with the CLI below live in your own source tree, so they need
+no extra Tailwind config.
+
 ### Individual components
 
 Install a component with the shadcn CLI (register the registry once):
@@ -67,6 +84,11 @@ and `onValueChange`).
 ```tsx
 import { LanguageSwitcher, PhoneInput, NavBar } from "@babelize/elements";
 ```
+
+The components are client components, and the package declares `"use client"` for
+you — importing them from a React Server Component works without any extra wrapper.
+The `cn` helper is also available from `@babelize/elements/utils`, which carries no
+directive and so can be called from server code.
 
 ### LanguageSwitcher
 

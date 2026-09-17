@@ -342,6 +342,7 @@ export const LanguageSwitcher = React.forwardRef<HTMLDivElement, LanguageSwitche
                 ref={inputRef}
                 type="text"
                 placeholder="Search..."
+                aria-label="Search languages"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full rounded-lg bg-zinc-100 px-3 py-1.5 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:ring-1 focus:ring-emerald-500/50 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"

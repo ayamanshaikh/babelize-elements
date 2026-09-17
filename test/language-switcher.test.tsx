@@ -68,4 +68,11 @@ describe("LanguageSwitcher", () => {
     render(<LanguageSwitcher locales={locales} data-testid="switcher" />);
     expect(screen.getByTestId("switcher")).toBeInTheDocument();
   });
+
+  it("gives the search box an accessible name", async () => {
+    render(<LanguageSwitcher locales={locales} />);
+    await userEvent.click(screen.getByRole("button", { name: /Current language/ }));
+
+    expect(screen.getByRole("textbox", { name: "Search languages" })).toBeInTheDocument();
+  });
 });

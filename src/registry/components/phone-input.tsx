@@ -25,18 +25,10 @@ export interface PhoneInputProps extends Omit<
   defaultValue?: string;
   /** Callback when the number or the selected country changes */
   onValueChange?: (phone: string, country: Country) => void;
-  /**
-   * @deprecated Use `onValueChange`. Kept for one release.
-   */
-  onChange?: (phone: string, country: Country) => void;
   /** ISO 3166-1 alpha-2 code of the initially selected country (default: "US") */
   defaultCountry?: string;
   /** Show the flag emoji beside the dial code (default: true) */
   showFlags?: boolean;
-  /**
-   * @deprecated Use `showFlags`. Kept for one release.
-   */
-  showFlag?: boolean;
   /** Accessible label for the field (default: "Phone number") */
   label?: string;
 }
@@ -103,28 +95,28 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(fu
     value,
     defaultValue,
     onValueChange,
-    onChange,
     defaultCountry = "US",
     placeholder = "Phone number",
     disabled = false,
     className,
-    showFlags,
-    showFlag,
+    showFlags = true,
     label = "Phone number",
     ...rest
   },
   forwardedRef,
 ) {
-  const flagsVisible = showFlags ?? showFlag ?? true;
   const [selectedCountry, setSelectedCountry] = React.useState<Country>(
     () => getCountryByCode(defaultCountry) ?? COUNTRIES[0],
   );
-  const notify = onValueChange ?? onChange;
   const [inputValue, setInputValue] = useControllableState(value, defaultValue ?? "", undefined);
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const ref = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  // The country search box needs its own ref. Sharing `inputRef` meant the search
+  // field overwrote it whenever the dropdown opened, which pointed the forwarded
+  // ref at the wrong element and sent focus to a node that was about to unmount.
+  const searchRef = React.useRef<HTMLInputElement>(null);
 
   React.useImperativeHandle(forwardedRef, () => inputRef.current as HTMLInputElement);
 
@@ -147,7 +139,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(fu
   }, []);
 
   React.useEffect(() => {
-    if (open) inputRef.current?.focus();
+    if (open) searchRef.current?.focus();
   }, [open]);
 
   React.useEffect(() => {
@@ -167,14 +159,14 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(fu
     setSelectedCountry(country);
     setOpen(false);
     setSearch("");
-    notify?.(inputValue, country);
+    onValueChange?.(inputValue, country);
     inputRef.current?.focus();
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    notify?.(newValue, selectedCountry);
+    onValueChange?.(newValue, selectedCountry);
   };
 
   return (
@@ -199,7 +191,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(fu
           aria-expanded={open}
           aria-haspopup="listbox"
         >
-          {flagsVisible && <span className="text-base leading-none">{selectedCountry.flag}</span>}
+          {showFlags && <span className="text-base leading-none">{selectedCountry.flag}</span>}
           <span className="font-mono text-xs">{selectedCountry.dialCode}</span>
           <svg
             className={cn(
@@ -241,9 +233,10 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(fu
         >
           <div className="border-b border-zinc-200 p-2 dark:border-zinc-800">
             <input
-              ref={inputRef}
+              ref={searchRef}
               type="text"
               placeholder="Search countries..."
+              aria-label="Search countries"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full rounded-lg bg-zinc-100 px-3 py-1.5 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:ring-1 focus:ring-emerald-500/50 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"

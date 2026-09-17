@@ -4,6 +4,8 @@ description: Install Babelize Elements components with the shadcn CLI.
 icon: Terminal
 ---
 
+import { Callout } from "fumadocs-ui/components/callout";
+
 # ShadCN CLI Integration
 
 Install individual Babelize Elements components directly into your project with the shadcn CLI.
@@ -36,7 +38,20 @@ npx shadcn@latest add @elements/phone-input
 npx shadcn@latest add @elements/navbar
 ```
 
-The CLI resolves each component's dependencies (including the `cn` utility) and drops the files into `components/ui/`.
+The CLI resolves each component's dependencies (including the `cn` utility) and
+writes each file to the alias its type selects — components to your `ui` alias,
+the `useControllableState` hook to `lib`. If you have relocated `ui` in
+`components.json`, components follow it.
+
+<Callout title="Your `cn` is left alone">
+  Components import `cn` through your `utils` alias and expect it to already be
+  there — the same assumption shadcn's own components make, since `shadcn init`
+  creates it. Nothing is written over your version, however you have customised it.
+
+The bundled `@babelize/elements` CLI additionally writes `cn` for you if the file
+is genuinely missing, so it works in projects that never ran `shadcn init`.
+
+</Callout>
 
 You can also install by direct URL:
 

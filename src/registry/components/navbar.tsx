@@ -30,14 +30,6 @@ export interface NavBarProps extends Omit<
   defaultValue?: string;
   /** Callback when the locale changes */
   onValueChange?: (code: string) => void;
-  /**
-   * @deprecated Use `value`. Kept for one release.
-   */
-  currentLocale?: string;
-  /**
-   * @deprecated Use `onValueChange`. Kept for one release.
-   */
-  onLocaleChange?: (code: string) => void;
   /** Primary call-to-action button */
   cta?: { label: string; href: string };
   /** Show a GitHub icon link */
@@ -115,8 +107,6 @@ export const NavBar = React.forwardRef<HTMLElement, NavBarProps>(function NavBar
     value,
     defaultValue,
     onValueChange,
-    currentLocale,
-    onLocaleChange,
     cta,
     showGitHub = false,
     githubUrl = "https://github.com/babelize/babelize-elements",
@@ -129,44 +119,61 @@ export const NavBar = React.forwardRef<HTMLElement, NavBarProps>(function NavBar
   forwardedRef,
 ) {
   const [locale, setLocale] = useControllableState(
-    value ?? currentLocale,
-    defaultValue ?? "en",
-    onValueChange ?? onLocaleChange,
+    value,
+    defaultValue ?? locales[0]?.code ?? "en",
+    onValueChange,
   );
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [langOpen, setLangOpen] = React.useState(false);
+  // Which bar opened the language menu, rather than a single boolean. The desktop
+  // and mobile bars are both always in the DOM — only CSS hides one — so a shared
+  // boolean mounted two listboxes into the accessibility tree at once.
+  const [langOpen, setLangOpen] = React.useState<"desktop" | "mobile" | null>(null);
   const langRef = React.useRef<HTMLDivElement>(null);
   const mobileLangRef = React.useRef<HTMLDivElement>(null);
+  const menuId = React.useId();
 
   const currentLocaleInfo = getLocaleInfo(locale);
 
   React.useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (langRef.current && !langRef.current.contains(e.target as Node)) {
-        setLangOpen(false);
-      }
+      const target = e.target as Node;
+      // Both containers have to be checked. Guarding only the desktop one made a
+      // mousedown inside the mobile dropdown count as "outside", which closed the
+      // menu before the option's click event could land — so picking a language
+      // on mobile did nothing at all.
+      if (langRef.current?.contains(target) || mobileLangRef.current?.contains(target)) return;
+      setLangOpen(null);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   React.useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      setLangOpen(null);
+      setMobileOpen(false);
     }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  React.useEffect(() => {
+    if (!mobileOpen) return;
+    // Restore whatever the host page had set rather than assuming it was empty.
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previous;
     };
   }, [mobileOpen]);
 
   const langButton = (
     <button
       type="button"
-      onClick={() => setLangOpen(!langOpen)}
+      onClick={() => setLangOpen(langOpen === "desktop" ? null : "desktop")}
       className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-      aria-expanded={langOpen}
+      aria-expanded={langOpen === "desktop"}
       aria-haspopup="listbox"
       aria-label={`Current language: ${currentLocaleInfo.label}`}
     >
@@ -175,7 +182,7 @@ export const NavBar = React.forwardRef<HTMLElement, NavBarProps>(function NavBar
       <svg
         className={cn(
           "size-3 text-zinc-500 transition-transform dark:text-zinc-400",
-          langOpen && "rotate-180",
+          langOpen === "desktop" && "rotate-180",
         )}
         fill="none"
         viewBox="0 0 24 24"
@@ -204,10 +211,10 @@ export const NavBar = React.forwardRef<HTMLElement, NavBarProps>(function NavBar
             aria-selected={isActive}
             onClick={() => {
               setLocale(item.code);
-              setLangOpen(false);
+              setLangOpen(null);
             }}
             className={cn(
-              "flex w-full items-center gap-2.5 px-3 py-2 text-sm rounded-lg mx-1.5 w-[calc(100%-12px)] transition-colors",
+              "mx-1.5 flex w-[calc(100%-12px)] items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
               isActive
                 ? "bg-emerald-500/10 text-emerald-600 font-medium dark:text-emerald-400"
                 : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100",
@@ -262,7 +269,7 @@ export const NavBar = React.forwardRef<HTMLElement, NavBarProps>(function NavBar
           {locales.length > 0 && (
             <div ref={langRef} className="relative">
               {langButton}
-              {langOpen && langDropdown}
+              {langOpen === "desktop" && langDropdown}
             </div>
           )}
 
@@ -300,22 +307,27 @@ export const NavBar = React.forwardRef<HTMLElement, NavBarProps>(function NavBar
             <div ref={mobileLangRef} className="relative">
               <button
                 type="button"
-                onClick={() => setLangOpen(!langOpen)}
+                onClick={() => setLangOpen(langOpen === "mobile" ? null : "mobile")}
                 className="inline-flex size-8 items-center justify-center rounded-md transition-colors text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+                aria-expanded={langOpen === "mobile"}
+                aria-haspopup="listbox"
                 aria-label={`Current language: ${currentLocaleInfo.label}`}
               >
                 {showFlags && (
                   <span className="text-base leading-none">{currentLocaleInfo.flag}</span>
                 )}
               </button>
-              {langOpen && langDropdown}
+              {langOpen === "mobile" && langDropdown}
             </div>
           )}
 
           <button
+            type="button"
             className="inline-flex size-8 items-center justify-center rounded-md transition-colors text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
+            aria-controls={mobileOpen ? menuId : undefined}
           >
             {mobileOpen ? (
               <svg
@@ -344,7 +356,10 @@ export const NavBar = React.forwardRef<HTMLElement, NavBarProps>(function NavBar
 
       {/* Mobile menu panel */}
       {mobileOpen && (
-        <div className="border-t border-zinc-200 bg-white px-4 py-3 md:hidden dark:border-zinc-800 dark:bg-zinc-900">
+        <div
+          id={menuId}
+          className="border-t border-zinc-200 bg-white px-4 py-3 md:hidden dark:border-zinc-800 dark:bg-zinc-900"
+        >
           {links.map((link) => (
             <Link
               key={link.href}

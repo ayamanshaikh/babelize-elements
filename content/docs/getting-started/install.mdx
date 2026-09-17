@@ -23,6 +23,42 @@ Install the full library with your preferred package manager:
   <Tab value="bun">```bash bun add @babelize/elements ```</Tab>
 </Tabs>
 
+## Tell Tailwind about the package
+
+Tailwind only generates the classes it can find in your source files, and it does
+not scan `node_modules`. Without this step the components render **unstyled**.
+
+Point Tailwind at the installed package once:
+
+<Tabs items={["Tailwind v4", "Tailwind v3"]}>
+  <Tab value="Tailwind v4">
+
+Add a `@source` line to the CSS file that imports Tailwind, with the path relative
+to that file:
+
+```css title="app/globals.css"
+@import "tailwindcss";
+@source "../node_modules/@babelize/elements/dist";
+```
+
+  </Tab>
+  <Tab value="Tailwind v3">
+
+Add the package to `content` in your Tailwind config:
+
+```js title="tailwind.config.js"
+module.exports = {
+  content: ["./src/**/*.{ts,tsx}", "./node_modules/@babelize/elements/dist/**/*.js"],
+};
+```
+
+  </Tab>
+</Tabs>
+
+This step is only for the npm package. Components installed with the
+[shadcn CLI](/docs/getting-started/shadcn-cli) live in your own source tree, which
+Tailwind already scans.
+
 ## Install individual components
 
 Prefer installing components one at a time, straight into your codebase? Use the [shadcn CLI](/docs/getting-started/shadcn-cli):
@@ -48,7 +84,7 @@ your `components/ui/` directory, and you own the code from then on.
 | React        | `>=18`          |
 | React DOM    | `>=18`          |
 | Tailwind CSS | `>=3`           |
-| Node.js      | `>=18`          |
+| Node.js      | `>=20`          |
 
 ## Verify Installation
 

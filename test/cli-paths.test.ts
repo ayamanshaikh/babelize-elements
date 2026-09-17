@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { parseJsonc, resolveAliasToDir, type TsPathsConfig } from "@/cli/paths";
+import {
+  parseJsonc,
+  resolveAliasToDir,
+  resolveFileDestination,
+  type TsPathsConfig,
+} from "@/cli/paths";
 
 const srcLayout: TsPathsConfig = { baseUrl: ".", paths: { "@/*": ["./src/*"] } };
 const rootLayout: TsPathsConfig = { baseUrl: ".", paths: { "@/*": ["./*"] } };
@@ -72,5 +77,70 @@ describe("parseJsonc", () => {
 
   it("returns null on malformed input instead of throwing", () => {
     expect(parseJsonc("{nope")).toBeNull();
+  });
+});
+
+describe("resolveFileDestination", () => {
+  const defaults = {
+    components: "@/components",
+    ui: "@/components/ui",
+    lib: "@/lib",
+    utils: "@/lib/utils",
+    hooks: "@/hooks",
+  };
+
+  it("writes ui items under the ui alias", () => {
+    expect(
+      resolveFileDestination("ui/language-switcher.tsx", "registry:ui", defaults, srcLayout),
+    ).toBe("src/components/ui/language-switcher.tsx");
+  });
+
+  it("honours a relocated ui alias, as the shadcn CLI does", () => {
+    const custom = { ...defaults, ui: "@/design/widgets" };
+    expect(resolveFileDestination("ui/navbar.tsx", "registry:ui", custom, srcLayout)).toBe(
+      "src/design/widgets/navbar.tsx",
+    );
+    // The shared types file has to land beside the components that import "./types".
+    expect(resolveFileDestination("ui/types.ts", "registry:ui", custom, srcLayout)).toBe(
+      "src/design/widgets/types.ts",
+    );
+  });
+
+  it("writes hooks under the hooks alias", () => {
+    expect(resolveFileDestination("hooks/use-thing.ts", "registry:hook", defaults, srcLayout)).toBe(
+      "src/hooks/use-thing.ts",
+    );
+  });
+
+  it("falls back to the components alias for an unknown type", () => {
+    expect(
+      resolveFileDestination(
+        "components/ui/language-switcher.tsx",
+        "registry:component",
+        defaults,
+        srcLayout,
+      ),
+    ).toBe("src/components/ui/language-switcher.tsx");
+  });
+
+  it("writes lib files under the lib alias", () => {
+    expect(
+      resolveFileDestination("lib/use-controllable-state.ts", "registry:lib", defaults, srcLayout),
+    ).toBe("src/lib/use-controllable-state.ts");
+  });
+
+  it("writes cn to the utils alias, which the rewritten imports point at", () => {
+    // A project may alias `utils` away from `<lib>/utils`; putting the file under
+    // lib anyway leaves every component importing a path that does not exist.
+    const custom = { ...defaults, utils: "@/helpers/cn" };
+    expect(resolveFileDestination("lib/utils.ts", "registry:lib", custom, srcLayout)).toBe(
+      "src/helpers/cn.ts",
+    );
+  });
+
+  it("leaves the default utils location unchanged", () => {
+    expect(resolveFileDestination("lib/utils.ts", "registry:lib", defaults, srcLayout)).toBe(
+      "src/lib/utils.ts",
+    );
   });
 });

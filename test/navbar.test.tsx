@@ -38,20 +38,6 @@ describe("NavBar", () => {
     expect(onValueChange).toHaveBeenCalledWith("fr");
   });
 
-  it("still accepts the deprecated currentLocale and onLocaleChange props", async () => {
-    const onLocaleChange = vi.fn();
-    render(<NavBar locales={locales} currentLocale="fr" onLocaleChange={onLocaleChange} />);
-
-    expect(
-      screen.getAllByRole("button", { name: /Current language: Français/ })[0],
-    ).toBeInTheDocument();
-
-    await userEvent.click(screen.getAllByRole("button", { name: /Current language/ })[0]);
-    await userEvent.click(screen.getAllByRole("option", { name: /English/ })[0]);
-
-    expect(onLocaleChange).toHaveBeenCalledWith("en");
-  });
-
   it("follows an externally changed value prop (controlled mode)", async () => {
     function Harness() {
       const [value, setValue] = React.useState("en");
@@ -73,6 +59,68 @@ describe("NavBar", () => {
     expect(
       screen.getAllByRole("button", { name: /Current language: Français/ })[0],
     ).toBeInTheDocument();
+  });
+
+  it("selects a language from the mobile bar", async () => {
+    // The desktop and mobile bars are both in the DOM; index 1 is the mobile one.
+    const onValueChange = vi.fn();
+    render(<NavBar locales={locales} onValueChange={onValueChange} />);
+
+    const triggers = screen.getAllByRole("button", { name: /Current language/ });
+    await userEvent.click(triggers[1]);
+    const options = screen.getAllByRole("option", { name: /Français/ });
+    await userEvent.click(options[options.length - 1]);
+
+    expect(onValueChange).toHaveBeenCalledWith("fr");
+  });
+
+  it("exposes a single listbox while the language menu is open", async () => {
+    render(<NavBar locales={locales} />);
+    await userEvent.click(screen.getAllByRole("button", { name: /Current language/ })[0]);
+
+    expect(screen.getAllByRole("listbox")).toHaveLength(1);
+  });
+
+  it("closes the language menu on Escape", async () => {
+    render(<NavBar locales={locales} />);
+    await userEvent.click(screen.getAllByRole("button", { name: /Current language/ })[0]);
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("listbox")).toBeNull();
+  });
+
+  it('defaults to the first locale rather than a hardcoded "en"', () => {
+    render(<NavBar locales={[{ code: "fr" }, { code: "de" }]} />);
+
+    expect(
+      screen.getAllByRole("button", { name: /Current language: Français/ })[0],
+    ).toBeInTheDocument();
+  });
+
+  it("gives the menu toggle a button type and an expanded state", async () => {
+    render(<NavBar links={links} />);
+    const toggle = screen.getByRole("button", { name: "Toggle menu" });
+
+    // Without type="button" the toggle submits any form the nav sits inside.
+    expect(toggle).toHaveAttribute("type", "button");
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+    await userEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("restores the page's own body overflow after the mobile menu closes", async () => {
+    document.body.style.overflow = "scroll";
+    render(<NavBar links={links} />);
+    const toggle = screen.getByRole("button", { name: "Toggle menu" });
+
+    await userEvent.click(toggle);
+    expect(document.body.style.overflow).toBe("hidden");
+    await userEvent.click(toggle);
+    expect(document.body.style.overflow).toBe("scroll");
+
+    document.body.style.overflow = "";
   });
 
   it("forwards a ref to the nav element and spreads extra props", () => {
