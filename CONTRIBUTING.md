@@ -111,8 +111,8 @@ This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.
 
 ## Security
 
-If you discover a security issue, please report it privately via [email](mailto:security@babelize.co) or [Discord](https://discord.gg/4kMng8XVcm). See [SECURITY.md](SECURITY.md) for details.
+If you discover a security issue, please report it privately via [email](mailto:security@babelize.co) or [Discord](https://discord.gg/Qqzr2g4KGx). See [SECURITY.md](SECURITY.md) for details.
 
 ## Questions?
 
-Open a [discussion](https://github.com/babelize/babelize-elements/discussions) or join the [Babelize community Discord](https://discord.gg/4kMng8XVcm).
+Open a [discussion](https://github.com/babelize/babelize-elements/discussions) or join the [Babelize community Discord](https://discord.gg/Qqzr2g4KGx).

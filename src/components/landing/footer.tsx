@@ -10,7 +10,7 @@ const resources = [
 
 const communityLinks = [
   { name: "GitHub Issues", href: "https://github.com/babelize/babelize-elements/issues" },
-  { name: "Discord Server", href: "https://discord.gg/4kMng8XVcm" },
+  { name: "Discord Server", href: "https://discord.gg/Qqzr2g4KGx" },
   { name: "Contributing", href: "/docs/getting-started/contributing" },
   { name: "Babelize GitHub", href: "https://github.com/babelize" },
 ];
@@ -47,7 +47,7 @@ export function Footer() {
                 </svg>
               </a>
               <a
-                href="https://discord.gg/4kMng8XVcm"
+                href="https://discord.gg/Qqzr2g4KGx"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex size-10 items-center justify-center rounded-xl text-white/40 transition-all hover:bg-white/5 hover:text-[#5865F2]"
