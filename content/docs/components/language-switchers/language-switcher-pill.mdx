@@ -21,8 +21,12 @@ import { Tabs, Tab } from "fumadocs-ui/components/tabs";
   <Tab value="shadcn" className="border-none bg-transparent p-0 mt-3">
     <Tabs items={["npx", "pnpm", "yarn", "bun"]} defaultValue="npx" groupId="installation-tabs">
       <Tab value="npx">```bash npx shadcn@latest add @elements/language-switcher-pill ```</Tab>
-      <Tab value="pnpm">```bash pnpm dlx shadcn@latest add @elements/language-switcher-pill ```</Tab>
-      <Tab value="yarn">```bash yarn dlx shadcn@latest add @elements/language-switcher-pill ```</Tab>
+      <Tab value="pnpm">
+        ```bash pnpm dlx shadcn@latest add @elements/language-switcher-pill ```
+      </Tab>
+      <Tab value="yarn">
+        ```bash yarn dlx shadcn@latest add @elements/language-switcher-pill ```
+      </Tab>
       <Tab value="bun">```bash bunx shadcn@latest add @elements/language-switcher-pill ```</Tab>
     </Tabs>
   </Tab>
@@ -40,3 +44,4 @@ import { Tabs, Tab } from "fumadocs-ui/components/tabs";
 
 ```tsx
 import { LanguageSwitcherPill } from "@/components/ui/language-switcher-pill";
+```
