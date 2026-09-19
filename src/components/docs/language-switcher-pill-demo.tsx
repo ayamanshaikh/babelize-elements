@@ -17,11 +17,7 @@ export function LanguageSwitcherPillDemo() {
 
   return (
     <div className="flex min-h-[180px] items-center justify-center">
-      <LanguageSwitcherPill
-        locales={locales}
-        locale={locale}
-        onLocaleChange={setLocale}
-      />
+      <LanguageSwitcherPill locales={locales} locale={locale} onLocaleChange={setLocale} />
     </div>
   );
 }
