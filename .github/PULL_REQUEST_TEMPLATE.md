@@ -21,11 +21,11 @@ Closes #
 ## Checklist
 
 - [ ] Dark mode / responsive styles considered
-- [ ] `bun install` succeeds
-- [ ] `bun run lint` passes
-- [ ] `bun run typecheck` passes
-- [ ] `bun run test` passes
-- [ ] `bun run build` passes
+- [ ] `npm ci` succeeds
+- [ ] `npm run lint` passes
+- [ ] `npm run typecheck` passes
+- [ ] `npm run test` passes
+- [ ] `npm run build` passes
 - [ ] CI checks pass
 
 ## Usage

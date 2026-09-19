@@ -25,7 +25,7 @@ When opening or triaging issues, use these labels:
    ```bash
    git clone https://github.com/<your-username>/babelize-elements.git
    cd babelize-elements
-   bun install
+   npm ci
    ```
 3. Create a branch for your work.
 4. Build your component in `src/registry/components/`.
@@ -52,7 +52,7 @@ Before opening a pull request, make sure your component:
       just the component and its props, no wrapper card or theme toggle (the preview
       shell provides those)
 - [ ] Has an MDX page embedding `<PreviewComponents registryName="<name>">`
-- [ ] Runs clean through `bun run lint`, `bun run typecheck`, `bun run test`, and `bun run build`
+- [ ] Runs clean through `npm ci`, `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`
 
 ## Opening a pull request
 
@@ -60,6 +60,8 @@ Use the [PR template](https://github.com/babelize/babelize-elements/compare) —
 
 - Keep changes focused on a single component.
 - Reference the issue your PR closes (e.g. `Closes #42`).
+- Run the local checks before opening the PR: `npm ci`, `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`.
+- Always attach screenshots or a screen recording in the PR. UI, component, docs, and layout changes need before/after stills or a short clip of the interaction — including dark mode and a narrow viewport when those apply.
 - In the PR description, include a brief usage snippet and any notes on design decisions.
 - Label your PR with `component` and the relevant category.
 
