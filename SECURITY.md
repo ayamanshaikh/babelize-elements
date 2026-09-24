@@ -7,7 +7,7 @@ responsibly. **Do not open a public issue.**
 
 Instead, please report it via:
 
-- **Discord:** [Babelize Discord](https://discord.gg/4kMng8XVcm) — DM a maintainer
+- **Discord:** [Babelize Discord](https://discord.gg/Qqzr2g4KGx) — DM a maintainer
 - **Email:** security@babelize.co
 
 You should receive a response within 48 hours. We will work with you to

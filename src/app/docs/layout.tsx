@@ -23,7 +23,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         footer: (
           <div key="sidebar-footer" className="flex flex-col gap-1 pt-4 mt-4">
             <a
-              href="https://discord.gg/4kMng8XVcm"
+              href="https://discord.gg/Qqzr2g4KGx"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center justify-between rounded-lg p-2 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground"

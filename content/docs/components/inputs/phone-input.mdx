@@ -39,17 +39,26 @@ import { Tabs, Tab } from "fumadocs-ui/components/tabs";
 ## Usage
 
 ```tsx
-import { PhoneInput } from "@/components/ui/phone-input";
-```
+"use client";
 
-```tsx
-<PhoneInput
-  defaultCountry="US"
-  placeholder="Enter phone number"
-  onValueChange={(value, country) => {
-    console.log(value, country.dialCode);
-  }}
-/>
+import { useState } from "react";
+import { PhoneInput } from "@/components/ui/phone-input";
+
+export function PhoneField() {
+  const [phone, setPhone] = useState("");
+
+  return (
+    <PhoneInput
+      defaultCountry="US"
+      placeholder="Enter phone number"
+      value={phone} // omit for uncontrolled
+      onValueChange={(value, country) => {
+        setPhone(value);
+        console.log(country.dialCode);
+      }}
+    />
+  );
+}
 ```
 
 ## Props

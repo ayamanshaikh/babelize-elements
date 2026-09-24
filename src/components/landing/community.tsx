@@ -36,7 +36,7 @@ const communityLinks = [
   {
     name: "Discord",
     description: "Join our community for support and discussions",
-    href: "https://discord.gg/4kMng8XVcm",
+    href: "https://discord.gg/Qqzr2g4KGx",
     icon: (
       <svg
         role="img"

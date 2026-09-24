@@ -39,22 +39,26 @@ import { Tabs, Tab } from "fumadocs-ui/components/tabs";
 ## Usage
 
 ```tsx
-import { LanguageSwitcher } from "@/components/ui/language-switcher";
-```
+"use client";
 
-```tsx
-<LanguageSwitcher
-  locales={[
-    { code: "en" },
-    { code: "fr" },
-    { code: "es" },
-    { code: "de" },
-    { code: "ja" },
-    { code: "ar" },
-  ]}
-  defaultValue="en"
-  onValueChange={(code) => console.log(code)}
-/>
+import { useState } from "react";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+
+const locales = [{ code: "en" }, { code: "fr" }, { code: "es" }, { code: "ja" }, { code: "ar" }];
+
+export function LocaleSwitcher() {
+  const [locale, setLocale] = useState("en");
+
+  return (
+    <LanguageSwitcher
+      locales={locales} // only `code` is required, labels and flags are auto-resolved
+      value={locale} // omit for uncontrolled, use defaultValue instead
+      onValueChange={setLocale}
+      label="native" // or "english" (default)
+      showFlags
+    />
+  );
+}
 ```
 
 ## Props

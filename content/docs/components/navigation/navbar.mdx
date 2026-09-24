@@ -39,23 +39,32 @@ import { Tabs, Tab } from "fumadocs-ui/components/tabs";
 ## Usage
 
 ```tsx
-import { NavBar } from "@/components/ui/navbar";
-```
+"use client";
 
-```tsx
-<NavBar
-  logo={<span className="font-bold text-lg">MyApp</span>}
-  links={[
-    { label: "Home", href: "/" },
-    { label: "Docs", href: "/docs" },
-    { label: "Pricing", href: "/pricing" },
-  ]}
-  locales={[{ code: "en" }, { code: "fr" }, { code: "es" }]}
-  value="en"
-  onValueChange={(code) => console.log(code)}
-  cta={{ label: "Get Started", href: "/signup" }}
-  showGitHub
-/>
+import { useState } from "react";
+import { NavBar } from "@/components/ui/navbar";
+
+const links = [
+  { label: "Home", href: "/" },
+  { label: "Docs", href: "/docs" },
+  { label: "Pricing", href: "/pricing" },
+];
+
+export function SiteNav() {
+  const [locale, setLocale] = useState("en");
+
+  return (
+    <NavBar
+      logo={<span className="text-lg font-bold">MyApp</span>}
+      links={links}
+      locales={[{ code: "en" }, { code: "fr" }, { code: "es" }]}
+      value={locale} // omit for uncontrolled, use defaultValue instead
+      onValueChange={setLocale}
+      cta={{ label: "Get Started", href: "/signup" }}
+      showGitHub
+    />
+  );
+}
 ```
 
 ## Props

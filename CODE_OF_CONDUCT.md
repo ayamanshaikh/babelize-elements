@@ -47,7 +47,7 @@ representative at an online or offline event.
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement via:
 
-- **Discord:** [Babelize Discord](https://discord.gg/4kMng8XVcm)
+- **Discord:** [Babelize Discord](https://discord.gg/Qqzr2g4KGx)
 - **Email:** conduct@babelize.co
 
 All complaints will be reviewed and investigated promptly and fairly.
