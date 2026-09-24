@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { LanguageSwitcherPill } from "@/registry/components";
+import { LanguageSwitcherPill } from "@/registry/components/language-switcher-pill";
 
 const locales = [
   { code: "en", label: "English" },

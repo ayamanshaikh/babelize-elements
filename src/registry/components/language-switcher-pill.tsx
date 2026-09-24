@@ -22,6 +22,9 @@ export interface LanguageSwitcherPillProps extends Omit<
   onLocaleChange?: (code: string) => void;
 }
 
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
+
 const RTL_LOCALES = new Set(["ar", "he", "fa", "ur", "ps", "sd", "yi"]);
 
 function isRtl(locale: Locale): boolean {
@@ -70,24 +73,35 @@ export const LanguageSwitcherPill = React.forwardRef<HTMLDivElement, LanguageSwi
 
       const buttonRect = button.getBoundingClientRect();
       const rootRect = root.getBoundingClientRect();
+      const rootStyle = window.getComputedStyle(root);
+      const paddingLeft = Number.parseFloat(rootStyle.paddingLeft) || 0;
+      const paddingRight = Number.parseFloat(rootStyle.paddingRight) || 0;
 
       setIndicator({
         width: buttonRect.width,
         offset:
-          direction === "rtl" ? rootRect.right - buttonRect.right : buttonRect.left - rootRect.left,
+          direction === "rtl"
+            ? rootRect.right - paddingRight - buttonRect.right
+            : buttonRect.left - rootRect.left - paddingLeft,
       });
     }, [selectedLocale, locales, direction]);
-    React.useLayoutEffect(() => {
+    useIsomorphicLayoutEffect(() => {
       updateIndicator();
     }, [updateIndicator]);
 
     React.useEffect(() => {
-      const handleResize = () => updateIndicator();
+      const root = rootRef.current;
 
-      window.addEventListener("resize", handleResize);
+      if (!root) return;
+
+      const observer = new ResizeObserver(() => {
+        updateIndicator();
+      });
+
+      observer.observe(root);
 
       return () => {
-        window.removeEventListener("resize", handleResize);
+        observer.disconnect();
       };
     }, [updateIndicator]);
 
@@ -131,7 +145,7 @@ export const LanguageSwitcherPill = React.forwardRef<HTMLDivElement, LanguageSwi
         ref={rootRef}
         dir={direction}
         className={cn(
-          "relative inline-flex rounded-full border border-zinc-200 bg-zinc-100 p-1 dark:border-zinc-800 dark:bg-zinc-900",
+          "relative inline-flex flex-row rounded-full border border-zinc-200 bg-zinc-100 p-1 dark:border-zinc-800 dark:bg-zinc-900",
           className,
         )}
         role="radiogroup"
@@ -156,6 +170,7 @@ export const LanguageSwitcherPill = React.forwardRef<HTMLDivElement, LanguageSwi
               ref={(element) => {
                 buttonRefs.current[index] = element;
               }}
+              dir={isRtl(item) ? "rtl" : "ltr"}
               type="button"
               role="radio"
               aria-checked={isActive}
