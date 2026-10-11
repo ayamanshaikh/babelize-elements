@@ -121,10 +121,9 @@ describe("LanguageSwitcherPill", () => {
   it("reverses arrow navigation in RTL", async () => {
     const user = userEvent.setup();
 
-    render(<LanguageSwitcherPill locales={locales} defaultLocale="ar" />);
+    render(<LanguageSwitcherPill locales={locales} dir="rtl" defaultLocale="ar" />);
 
     const arabic = screen.getByRole("radio", { name: "العربية" });
-
     const french = screen.getByRole("radio", { name: "Français" });
 
     arabic.focus();
@@ -156,15 +155,49 @@ describe("LanguageSwitcherPill", () => {
     expect(english).toHaveAttribute("aria-checked", "true");
   });
 
-  it("sets RTL direction for an RTL locale", () => {
-    const { container } = render(<LanguageSwitcherPill locales={locales} defaultLocale="ar" />);
+  it("applies the dir prop to the root element", () => {
+    const { container, rerender } = render(<LanguageSwitcherPill locales={locales} dir="rtl" />);
 
     expect(container.firstElementChild).toHaveAttribute("dir", "rtl");
+
+    rerender(<LanguageSwitcherPill locales={locales} dir="ltr" />);
+    expect(container.firstElementChild).toHaveAttribute("dir", "ltr");
   });
 
-  it("sets LTR direction for an LTR locale", () => {
-    const { container } = render(<LanguageSwitcherPill locales={locales} defaultLocale="en" />);
+  it("sets per-button dir attribute for RTL locales", () => {
+    render(<LanguageSwitcherPill locales={locales} />);
 
-    expect(container.firstElementChild).toHaveAttribute("dir", "ltr");
+    expect(screen.getByRole("radio", { name: "English" })).toHaveAttribute("dir", "ltr");
+    expect(screen.getByRole("radio", { name: "العربية" })).toHaveAttribute("dir", "rtl");
+  });
+
+  it("does not flip container direction or oscillate when navigating to an RTL locale", async () => {
+    const user = userEvent.setup();
+    const demoLocales = [
+      { code: "en", label: "English" },
+      { code: "fr", label: "Français" },
+      { code: "de", label: "Deutsch" },
+      { code: "ja", label: "日本語" },
+      { code: "ar", label: "العربية", rtl: true },
+    ];
+
+    const { container } = render(<LanguageSwitcherPill locales={demoLocales} defaultLocale="ja" />);
+
+    const ja = screen.getByRole("radio", { name: "日本語" });
+    const ar = screen.getByRole("radio", { name: "العربية" });
+    const en = screen.getByRole("radio", { name: "English" });
+
+    ja.focus();
+
+    // ArrowRight from ja selects ar
+    await user.keyboard("{ArrowRight}");
+    expect(ar).toHaveFocus();
+    expect(ar).toHaveAttribute("aria-checked", "true");
+    expect(container.firstElementChild).not.toHaveAttribute("dir", "rtl");
+
+    // Next ArrowRight wraps to en instead of oscillating back to ja
+    await user.keyboard("{ArrowRight}");
+    expect(en).toHaveFocus();
+    expect(en).toHaveAttribute("aria-checked", "true");
   });
 });

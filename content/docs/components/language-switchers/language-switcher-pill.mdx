@@ -42,45 +42,143 @@ import { Tabs, Tab } from "fumadocs-ui/components/tabs";
 
 ## Usage
 
-````tsx
+```tsx
+"use client";
+
+import { useState } from "react";
 import { LanguageSwitcherPill } from "@/components/ui/language-switcher-pill";
 
-```mdx
-```tsx
-import { useState } from "react";
-
 const locales = [
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "es", label: "Español", flag: "🇪🇸" },
-  { code: "fr", label: "Français", flag: "🇫🇷" },
+  { code: "en", label: "English" },
+  { code: "fr", label: "Français" },
+  { code: "ar", label: "العربية", rtl: true }, // rtl auto-detected, override optional
 ];
 
-export function Example() {
+export function LocalePill() {
   const [locale, setLocale] = useState("en");
 
   return (
     <LanguageSwitcherPill
       locales={locales}
-      locale={locale}
+      locale={locale} // omit for uncontrolled, use defaultLocale instead
       onLocaleChange={setLocale}
     />
   );
 }
+```
 
 ## Props
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `locales` | `Locale[]` | — | List of available languages. |
-| `locale` | `string` | — | Controlled selected locale. |
-| `defaultLocale` | `string` | First locale | Initial locale for uncontrolled usage. |
-| `onLocaleChange` | `(locale: string) => void` | — | Called when the selected language changes. |
-| `className` | `string` | — | Additional CSS classes for the pill. |
+| Prop             | Type                     | Required | Description                                                                   |
+| ---------------- | ------------------------ | -------- | ----------------------------------------------------------------------------- |
+| `locales`        | `Locale[]`               | Yes      | Array of available locales — only `code` is required                          |
+| `locale`         | `string`                 | No       | Selected locale code — pass this to control the component                     |
+| `defaultLocale`  | `string`                 | No       | Initial selected locale code when uncontrolled (default: first locale's code) |
+| `onLocaleChange` | `(code: string) => void` | No       | Callback when the selected locale changes                                     |
+| `className`      | `string`                 | No       | Additional CSS classes for the pill container                                 |
+
+Remaining `div` props forward to the root element.
+
+### Locale Object
+
+| Property | Type      | Description                                                          |
+| -------- | --------- | -------------------------------------------------------------------- |
+| `code`   | `string`  | ISO 639-1 / BCP 47 code (e.g. `"en"`, `"fr"`, `"ar"`) — **required** |
+| `label`  | `string`  | Display name for the language pill                                   |
+| `rtl`    | `boolean` | Override RTL direction for text shaping (auto-detected if omitted)   |
+
+## Examples
+
+### With Babelize SDK
+
+Pair Language Switcher Pill with the [Babelize SDK](https://babelize.co) for automatic translations:
+
+```tsx
+"use client";
+
+import { useRouter } from "next/navigation";
+import { LanguageSwitcherPill } from "@/components/ui/language-switcher-pill";
+import { useBabelize } from "@babelize/sdk/react";
+
+const locales = [
+  { code: "en", label: "English" },
+  { code: "fr", label: "Français" },
+  { code: "es", label: "Español" },
+  { code: "de", label: "Deutsch" },
+  { code: "ar", label: "العربية" },
+];
+
+export function LocaleSwitcher() {
+  const router = useRouter();
+  const { locale, setLocale } = useBabelize();
+
+  return (
+    <LanguageSwitcherPill
+      locales={locales}
+      locale={locale}
+      onLocaleChange={(code) => {
+        setLocale(code);
+        router.push(`/${code}`);
+      }}
+    />
+  );
+}
+```
+
+### With next-intl
+
+```tsx
+"use client";
+
+import { useRouter } from "next/navigation";
+import { LanguageSwitcherPill } from "@/components/ui/language-switcher-pill";
+
+export function LocaleSwitcher() {
+  const router = useRouter();
+
+  return (
+    <LanguageSwitcherPill
+      locales={[
+        { code: "en", label: "EN" },
+        { code: "fr", label: "FR" },
+        { code: "de", label: "DE" },
+      ]}
+      defaultLocale="en"
+      onLocaleChange={(code) => router.push(`/${code}`)}
+    />
+  );
+}
+```
+
+### With react-i18next
+
+```tsx
+"use client";
+
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcherPill } from "@/components/ui/language-switcher-pill";
+
+export function LocaleSwitcher() {
+  const { i18n } = useTranslation();
+
+  return (
+    <LanguageSwitcherPill
+      locales={[
+        { code: "en", label: "English" },
+        { code: "fr", label: "Français" },
+        { code: "es", label: "Español" },
+      ]}
+      locale={i18n.language}
+      onLocaleChange={(code) => i18n.changeLanguage(code)}
+    />
+  );
+}
+```
 
 ## Keyboard Navigation
 
-- **Arrow Right** — Move to the next language.
-- **Arrow Left** — Move to the previous language.
+- **Arrow Right** — Move to the next language (previous in RTL layouts).
+- **Arrow Left** — Move to the previous language (next in RTL layouts).
 - **Home** — Move to the first language.
 - **End** — Move to the last language.
 - **Enter / Space** — Select the focused language.
@@ -89,17 +187,14 @@ export function Example() {
 
 The component supports right-to-left languages such as Arabic, Hebrew, Persian, Urdu, Pashto, Sindhi, and Yiddish.
 
-Locale-specific direction is applied automatically, while the active indicator follows the selected language.
+Per-locale direction is applied to individual pills for correct text shaping, while the overall layout and arrow navigation respect the document or container `dir`.
 
 ```tsx
 const locales = [
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "ar", label: "العربية", flag: "🇸🇦", rtl: true },
-  { code: "he", label: "עברית", flag: "🇮🇱", rtl: true },
+  { code: "en", label: "English" },
+  { code: "ar", label: "العربية", rtl: true },
+  { code: "he", label: "עברית", rtl: true },
 ];
 
-<LanguageSwitcherPill
-  locales={locales}
-  defaultLocale="en"
-/>;
-````
+<LanguageSwitcherPill locales={locales} defaultLocale="en" />;
+```

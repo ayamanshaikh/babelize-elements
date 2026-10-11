@@ -35,7 +35,15 @@ function isRtl(locale: Locale): boolean {
 
 export const LanguageSwitcherPill = React.forwardRef<HTMLDivElement, LanguageSwitcherPillProps>(
   function LanguageSwitcherPill(
-    { locale: localeProp, defaultLocale, locales, onLocaleChange, className, ...rest },
+    {
+      locale: localeProp,
+      defaultLocale,
+      locales,
+      onLocaleChange,
+      className,
+      dir: dirProp,
+      ...rest
+    },
     forwardedRef,
   ) {
     const [locale, setLocale] = useControllableState(
@@ -58,11 +66,27 @@ export const LanguageSwitcherPill = React.forwardRef<HTMLDivElement, LanguageSwi
 
     const selectedLocale = hasSelectedLocale ? locale : (locales[0]?.code ?? "");
 
-    const activeIndex = locales.findIndex((item) => item.code === selectedLocale);
+    const [inheritedDir, setInheritedDir] = React.useState<"ltr" | "rtl">(() => {
+      if (
+        typeof document !== "undefined" &&
+        (document.documentElement?.dir === "rtl" || document.body?.dir === "rtl")
+      ) {
+        return "rtl";
+      }
+      return "ltr";
+    });
 
-    const activeLocale = activeIndex >= 0 ? locales[activeIndex] : undefined;
+    useIsomorphicLayoutEffect(() => {
+      if (dirProp) return;
+      const root = rootRef.current;
+      if (!root) return;
+      const computed = window.getComputedStyle(root).direction;
+      if (computed === "rtl" || computed === "ltr") {
+        setInheritedDir(computed);
+      }
+    }, [dirProp]);
 
-    const direction = activeLocale && isRtl(activeLocale) ? "rtl" : "ltr";
+    const direction = dirProp === "rtl" || dirProp === "ltr" ? dirProp : inheritedDir;
 
     const updateIndicator = React.useCallback(() => {
       const index = locales.findIndex((item) => item.code === selectedLocale);
@@ -73,18 +97,13 @@ export const LanguageSwitcherPill = React.forwardRef<HTMLDivElement, LanguageSwi
 
       const buttonRect = button.getBoundingClientRect();
       const rootRect = root.getBoundingClientRect();
-      const rootStyle = window.getComputedStyle(root);
-      const paddingLeft = Number.parseFloat(rootStyle.paddingLeft) || 0;
-      const paddingRight = Number.parseFloat(rootStyle.paddingRight) || 0;
 
       setIndicator({
         width: buttonRect.width,
-        offset:
-          direction === "rtl"
-            ? rootRect.right - paddingRight - buttonRect.right
-            : buttonRect.left - rootRect.left - paddingLeft,
+        offset: buttonRect.left - rootRect.left - root.clientLeft,
       });
-    }, [selectedLocale, locales, direction]);
+    }, [selectedLocale, locales]);
+
     useIsomorphicLayoutEffect(() => {
       updateIndicator();
     }, [updateIndicator]);
@@ -99,6 +118,15 @@ export const LanguageSwitcherPill = React.forwardRef<HTMLDivElement, LanguageSwi
       });
 
       observer.observe(root);
+      for (const button of buttonRefs.current) {
+        if (button) observer.observe(button);
+      }
+
+      if (typeof document !== "undefined" && "fonts" in document) {
+        document.fonts?.ready?.then(() => {
+          updateIndicator();
+        });
+      }
 
       return () => {
         observer.disconnect();
@@ -143,7 +171,7 @@ export const LanguageSwitcherPill = React.forwardRef<HTMLDivElement, LanguageSwi
     return (
       <div
         ref={rootRef}
-        dir={direction}
+        dir={dirProp}
         className={cn(
           "relative inline-flex flex-row rounded-full border border-zinc-200 bg-zinc-100 p-1 dark:border-zinc-800 dark:bg-zinc-900",
           className,
@@ -154,10 +182,10 @@ export const LanguageSwitcherPill = React.forwardRef<HTMLDivElement, LanguageSwi
       >
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-1 rounded-full bg-white shadow-sm transition-[left,right,width] duration-200 ease-out dark:bg-zinc-800"
+          className="pointer-events-none absolute inset-y-1 left-0 rounded-full bg-white shadow-sm transition-[transform,width] duration-200 ease-out dark:bg-zinc-800"
           style={{
             width: indicator.width,
-            ...(direction === "rtl" ? { right: indicator.offset } : { left: indicator.offset }),
+            transform: `translateX(${indicator.offset}px)`,
           }}
         />
 
