@@ -36,7 +36,7 @@ const ITEMS: ItemDef[] = [
     source: "registry/components/language-switcher",
     filePath: "ui/language-switcher.tsx",
     dependencies: ["clsx", "tailwind-merge"],
-    registryDependencies: ["locale-types", "use-controllable-state"],
+    registryDependencies: ["locale-types", "locale-data", "use-controllable-state"],
   },
   {
     name: "language-switcher-pill",
@@ -68,7 +68,26 @@ const ITEMS: ItemDef[] = [
     source: "registry/components/navbar",
     filePath: "ui/navbar.tsx",
     dependencies: ["clsx", "tailwind-merge"],
-    registryDependencies: ["locale-types", "use-controllable-state"],
+    registryDependencies: ["locale-types", "locale-data", "use-controllable-state"],
+  },
+  {
+    name: "translation-widget",
+    title: "Translation Widget",
+    description:
+      "Side-by-side translation view with editable target, RTL-aware layout, and claymorphism styling.",
+    type: "registry:ui",
+    source: "registry/components/translation-widget",
+    filePath: "ui/translation-widget.tsx",
+    dependencies: ["clsx", "tailwind-merge"],
+    registryDependencies: ["language-switcher", "locale-types", "use-controllable-state"],
+  },
+  {
+    name: "locale-data",
+    title: "Locale Data",
+    description: "Shared flag, language-name and RTL lookups for locale-aware components.",
+    type: "registry:ui",
+    source: "registry/components/locale-data",
+    filePath: "ui/locale-data.ts",
   },
   {
     name: "locale-types",
@@ -95,6 +114,23 @@ const ITEMS: ItemDef[] = [
     source: "lib/utils",
     filePath: "lib/utils.ts",
     dependencies: ["clsx", "tailwind-merge"],
+  },
+  {
+    name: "locale-number",
+    title: "Locale Number",
+    description:
+      "Locale-aware number formatting for decimals, percentages, units, and compact notation.",
+    type: "registry:ui",
+    source: "registry/components/locale-number",
+    filePath: "ui/locale-number.tsx",
+  },
+  {
+    name: "relative-time",
+    title: "Relative Time",
+    description: "Locale-aware relative time formatting with optional live updates.",
+    type: "registry:ui",
+    source: "registry/components/relative-time",
+    filePath: "ui/relative-time.tsx",
   },
 ];
 
